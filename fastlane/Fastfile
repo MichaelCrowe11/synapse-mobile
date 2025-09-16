@@ -1,0 +1,163 @@
+# Fastlane configuration for Synapse Mobile
+
+default_platform(:android)
+
+platform :android do
+  desc "Build debug APK"
+  lane :build_debug do
+    gradle(
+      task: "assembleDebug",
+      project_dir: "./android"
+    )
+  end
+
+  desc "Build release APK"
+  lane :build_release do
+    gradle(
+      task: "assembleRelease",
+      project_dir: "./android",
+      properties: {
+        "android.injected.signing.store.file" => ENV["KEYSTORE_FILE"],
+        "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["KEY_PASSWORD"],
+      }
+    )
+  end
+
+  desc "Deploy to Google Play Store (Internal Testing)"
+  lane :deploy_internal do
+    build_release
+    upload_to_play_store(
+      track: "internal",
+      release_status: "draft",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Deploy to Google Play Store (Beta)"
+  lane :deploy_beta do
+    build_release
+    upload_to_play_store(
+      track: "beta",
+      release_status: "draft"
+    )
+  end
+
+  desc "Deploy to Google Play Store (Production)"
+  lane :deploy_production do
+    build_release
+    upload_to_play_store(
+      track: "production",
+      release_status: "completed"
+    )
+  end
+
+  desc "Run tests"
+  lane :test do
+    gradle(
+      task: "test",
+      project_dir: "./android"
+    )
+  end
+end
+
+platform :ios do
+  desc "Build iOS app"
+  lane :build do
+    cocoapods(
+      podfile: "./ios/Podfile"
+    )
+
+    build_app(
+      workspace: "./ios/SynapseMobile.xcworkspace",
+      scheme: "SynapseMobile",
+      export_method: "development"
+    )
+  end
+
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    build
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Deploy to App Store"
+  lane :release do
+    build_app(
+      workspace: "./ios/SynapseMobile.xcworkspace",
+      scheme: "SynapseMobile",
+      export_method: "app-store"
+    )
+    upload_to_app_store(
+      skip_metadata: false,
+      skip_screenshots: false,
+      submit_for_review: false,
+      automatic_release: false
+    )
+  end
+
+  desc "Run tests"
+  lane :test do
+    run_tests(
+      workspace: "./ios/SynapseMobile.xcworkspace",
+      scheme: "SynapseMobile",
+      devices: ["iPhone 14", "iPad Pro (12.9-inch) (6th generation)"]
+    )
+  end
+end
+
+# Cross-platform lanes
+desc "Increment version number"
+lane :bump_version do |options|
+  type = options[:type] || "patch" # major, minor, patch
+
+  # Update package.json
+  package = JSON.parse(File.read("../package.json"))
+  current_version = package["version"]
+
+  version_parts = current_version.split(".")
+  case type
+  when "major"
+    version_parts[0] = (version_parts[0].to_i + 1).to_s
+    version_parts[1] = "0"
+    version_parts[2] = "0"
+  when "minor"
+    version_parts[1] = (version_parts[1].to_i + 1).to_s
+    version_parts[2] = "0"
+  when "patch"
+    version_parts[2] = (version_parts[2].to_i + 1).to_s
+  end
+
+  new_version = version_parts.join(".")
+  package["version"] = new_version
+  File.write("../package.json", JSON.pretty_generate(package))
+
+  # Update app.json
+  app_json = JSON.parse(File.read("../app.json"))
+  app_json["version"] = new_version
+  File.write("../app.json", JSON.pretty_generate(app_json))
+
+  # Commit changes
+  git_commit(
+    path: ["package.json", "app.json"],
+    message: "Bump version to #{new_version}"
+  )
+
+  # Tag release
+  add_git_tag(
+    tag: "v#{new_version}"
+  )
+
+  UI.success("Version bumped to #{new_version} 🎉")
+end
+
+desc "Create screenshots for app stores"
+lane :screenshots do
+  capture_android_screenshots
+  capture_ios_screenshots
+end

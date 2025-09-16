@@ -1,4 +1,42 @@
 {
   "name": "SynapseMobile",
-  "displayName": "SynapseMobile"
+  "displayName": "Synapse Mobile",
+  "version": "1.0.0",
+  "description": "Mobile app for Synapse programming language - quantum computing and scientific reasoning on mobile devices",
+  "author": "Michael Benjamin Crowe",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MichaelCrowe11/synapse-mobile"
+  },
+  "keywords": [
+    "synapse",
+    "quantum-computing",
+    "scientific-computing",
+    "mobile",
+    "programming-language"
+  ],
+  "android": {
+    "package": "com.michaelcrowe.synapsemobile",
+    "versionCode": 1,
+    "adaptiveIcon": {
+      "foregroundImage": "./assets/adaptive-icon.png",
+      "backgroundColor": "#7A5CFF"
+    }
+  },
+  "ios": {
+    "bundleIdentifier": "com.michaelcrowe.synapsemobile",
+    "buildNumber": "1",
+    "supportsTablet": true,
+    "infoPlist": {
+      "NSCameraUsageDescription": "This app does not use the camera.",
+      "NSPhotoLibraryUsageDescription": "This app does not access your photo library."
+    }
+  },
+  "theme": {
+    "primaryColor": "#7A5CFF",
+    "accentColor": "#43E5FF",
+    "backgroundColor": "#1e1e1e",
+    "textColor": "#ffffff"
+  }
 }

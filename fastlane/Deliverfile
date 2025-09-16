@@ -1,0 +1,66 @@
+# Fastlane Deliverfile - App Store metadata configuration
+
+# App Store Connect / Google Play Console metadata
+app_identifier("com.michaelcrowe.synapsemobile")
+
+# App Store submission details
+submit_for_review(false)  # Set to true for automatic submission
+automatic_release(false)  # Set to true for automatic release after approval
+force(false)  # Don't force uploads
+
+# Metadata
+primary_category("EDUCATION")
+secondary_category("PRODUCTIVITY")
+
+# Pricing
+price_tier(0)  # Free app
+
+# App description
+description({
+  "en-US" => "Synapse Mobile - A powerful mobile programming environment for quantum computing and scientific reasoning. Write and execute Synapse code directly on your mobile device with support for uncertainty quantification, parallel processing, and quantum circuits."
+})
+
+# Keywords for App Store search
+keywords({
+  "en-US" => "programming,quantum computing,scientific computing,mobile development,education,synapse"
+})
+
+# Support and marketing URLs
+support_url("https://github.com/MichaelCrowe11/synapse-mobile")
+marketing_url("https://github.com/MichaelCrowe11/synapse-mobile")
+privacy_url("https://github.com/MichaelCrowe11/synapse-mobile/blob/main/PRIVACY.md")
+
+# App review information
+app_review_information({
+  first_name: "Michael",
+  last_name: "Crowe",
+  phone_number: "+1-xxx-xxx-xxxx",
+  email_address: "michael@example.com",
+  demo_user: "demo@example.com",
+  demo_password: "demo123",
+  notes: "This is a mobile programming environment for the Synapse language. No special setup required - just install and run."
+})
+
+# Release notes
+release_notes({
+  "en-US" => "Initial release of Synapse Mobile - Mobile programming environment for quantum computing and scientific reasoning."
+})
+
+# Age rating
+age_rating_declaration({
+  UNRESTRICTIVE_WEB_ACCESS: false,
+  GAMBLING_AND_CONTESTS: false,
+  MATURE_OR_SUGGESTIVE_THEMES: false,
+  ALCOHOL_TOBACCO_OR_DRUG_USE_OR_REFERENCES: false,
+  SIMULATED_GAMBLING: false,
+  SEXUAL_CONTENT_OR_NUDITY: false,
+  GRAPHIC_AND_REALISTIC_VIOLENCE: false,
+  UNRESTRICTED_WEB_ACCESS: false,
+  GAMBLING: false
+})
+
+# Skip certain steps
+skip_binary_upload(false)
+skip_screenshots(true)  # We'll handle screenshots separately
+skip_metadata(false)
+skip_app_version_update(false)
