@@ -15,29 +15,34 @@ export class LocalInterpreter {
 
   async execute(code: string): Promise<ExecutionResult> {
     try {
+      // Handle special cases first
+      if (code.trim().startsWith('quantum circuit')) {
+        return this.handleQuantumCircuit(code.trim());
+      }
+      if (code.trim().startsWith('parallel')) {
+        return this.handleParallel(code.trim());
+      }
+      if (code.trim().startsWith('run ')) {
+        return this.handleRun(code.trim());
+      }
+
       // Remove comments
       const lines = code.split('\n').map(line => {
         const commentIndex = line.indexOf('#');
         return commentIndex >= 0 ? line.substring(0, commentIndex).trim() : line.trim();
       }).filter(line => line.length > 0);
 
+      let lastResult: ExecutionResult = {type: 'success', value: 'Execution completed'};
+
       for (const line of lines) {
         const result = await this.executeLine(line);
         if (result.type === 'error') {
           return result;
         }
+        lastResult = result;
       }
 
-      // Return last variable or success
-      if (this.variables.size > 0) {
-        const lastVar = Array.from(this.variables.entries()).pop();
-        return {
-          type: 'success',
-          value: lastVar ? `${lastVar[0]} = ${this.formatValue(lastVar[1])}` : 'Execution completed',
-        };
-      }
-
-      return {type: 'success', value: 'Execution completed'};
+      return lastResult;
     } catch (error: any) {
       return {
         type: 'error',
@@ -50,28 +55,6 @@ export class LocalInterpreter {
     // Handle variable assignment
     if (line.includes('=')) {
       return this.handleAssignment(line);
-    }
-
-    // Handle quantum circuit (mock for local)
-    if (line.startsWith('quantum circuit')) {
-      return this.handleQuantumCircuit(line);
-    }
-
-    // Handle parallel block (mock for local)
-    if (line.startsWith('parallel')) {
-      return {
-        type: 'parallel',
-        message: 'Parallel execution requires cloud computing',
-        branches: {
-          A: 'Mock result A',
-          B: 'Mock result B',
-        },
-      };
-    }
-
-    // Handle run command
-    if (line.startsWith('run')) {
-      return this.handleRun(line);
     }
 
     return {type: 'success', value: line};
@@ -156,6 +139,17 @@ export class LocalInterpreter {
       };
     }
     return {type: 'error', message: 'Invalid run syntax'};
+  }
+
+  private handleParallel(line: string): ExecutionResult {
+    return {
+      type: 'parallel',
+      message: 'Parallel execution requires cloud computing',
+      branches: {
+        A: 'Mock result A',
+        B: 'Mock result B',
+      },
+    };
   }
 
   private formatValue(value: any): string {
